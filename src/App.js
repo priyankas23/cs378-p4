@@ -11,6 +11,9 @@ const headerImage = {
   logo: 'INPLANESIGHTLOGO.PNG',
 }
 
+const API_KEY = '5e280eff54msh125ec8c51385101p131466jsne19c66db25b6';
+
+// This is a constant for the Header Logo 
 export const HeaderItems = ({logo}) => {
   return(
     <Container fluid> 
@@ -24,6 +27,30 @@ export const HeaderItems = ({logo}) => {
 }
 
 
+const fetchFlightSchedule = async (airportCode) => {
+  console.log("Fetching flight schedule for:", airportCode);
+
+  const url = `https://aerodatabox.p.rapidapi.com/flights/airports/iata/${airportCode}?offsetMinutes=-120&durationMinutes=720&withLeg=true&direction=Both&withCancelled=true&withCodeshared=true&withCargo=true&withPrivate=true&withLocation=false`;
+
+  console.log("Fetching from URL:", url);
+
+  const options = {
+    method: 'GET',
+    headers: {
+      'x-rapidapi-key': API_KEY,
+      'x-rapidapi-host': 'aerodatabox.p.rapidapi.com'
+    }
+  };
+  
+  try {
+    const response = await fetch(url, options);
+    const result = await response.text();
+    console.log(result);
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 export function SearchBox() {
   const [searchText, setSearchText] = useState('');
 
@@ -35,7 +62,7 @@ export function SearchBox() {
     <div>
       <input
         type="text"
-        placeholder="Search..."
+        placeholder="or search by IATA code..."
         value={searchText}
         onChange={handleInputChange}
       />
@@ -52,9 +79,9 @@ function App() {
         <HeaderItems logo = {headerImage.logo}></HeaderItems>
       </div>
       <h1>MY AIRPORTS </h1>
-      <Button> DFW </Button>
-      <Button> SFO </Button>
-      <Button> AUS </Button>
+      <Button onClick={()=>fetchFlightSchedule('DFW')}> DFW </Button>
+      <Button onClick={()=>fetchFlightSchedule('SFO')}> SFO </Button>
+      <Button onClick={()=>fetchFlightSchedule('AUS')}> AUS </Button>
       <SearchBox></SearchBox>
     </div>
   );
