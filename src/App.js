@@ -16,13 +16,13 @@ const API_KEY = '5e280eff54msh125ec8c51385101p131466jsne19c66db25b6';
 // This is a constant for the Header Logo 
 export const HeaderItems = ({logo}) => {
   return(
-    <Container fluid> 
+    <div>
       <Col sm={{span: 4}}>
       <div className = "headerimg">
        <img src= {(process.env.PUBLIC_URL+'/images/'+logo)}></img>
       </div>
     </Col>
-    </Container>
+   </div>
 );
 }
 
@@ -76,12 +76,12 @@ function App() {
   return (
     <div className="App">
       <div className = "headerImage">
-        <HeaderItems logo = {headerImage.logo}></HeaderItems>
+        <HeaderItems style = {{padding: '0px', margin: '0px'}}logo = {headerImage.logo}></HeaderItems>
       </div>
-      <h1>MY AIRPORTS </h1>
-      <Button onClick={()=>fetchFlightSchedule('DFW')}> DFW </Button>
-      <Button onClick={()=>fetchFlightSchedule('SFO')}> SFO </Button>
-      <Button onClick={()=>fetchFlightSchedule('AUS')}> AUS </Button>
+      <h1><b>MY AIRPORTS</b></h1>
+      <Button style={{backgroundColor: '#6cb1c9', width: "100px", borderColor: '#6cb1c9', borderRadius: '20px', margin: '10px' }} font = "Helvetica" className = "airportbutton" onClick={()=>fetchFlightSchedule('DFW')}> <b>DFW</b></Button>
+      <Button style={{backgroundColor: '#6cb1c9', width: "100px", borderColor: '#6cb1c9', borderRadius: '20px', margin: '10px' }} font = "Helvetica" className = "airportbutton" onClick={()=>fetchFlightSchedule('SFO')}> <b>SFO</b> </Button>
+      <Button style={{backgroundColor: '#6cb1c9', width: "100px", borderColor: '#6cb1c9', borderRadius: '20px', margin: '10px' }} font = "Helvetica" className = "airportbutton" onClick={()=>fetchFlightSchedule('AUS')}> <b>AUS</b> </Button>
       <SearchBox></SearchBox>
     </div>
   );
