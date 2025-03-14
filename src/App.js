@@ -5,6 +5,7 @@ import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import React, { useState } from 'react';
 import Card from 'react-bootstrap/Card';
+import { format, parseISO } from 'date-fns';
 
 
 
@@ -29,6 +30,27 @@ export const HeaderItems = ({ logo }) => {
 }
 
 
+const fetchAirportName = async(airportCode, setAirportName) => {
+  const url = `https://aerodatabox.p.rapidapi.com/airports/iata/${airportCode}`;
+  const options = {
+	method: 'GET',
+	headers: {
+		'x-rapidapi-key': '5e280eff54msh125ec8c51385101p131466jsne19c66db25b6',
+		'x-rapidapi-host': 'aerodatabox.p.rapidapi.com'
+	}
+};
+
+try {
+	const response = await fetch(url, options);
+	const result = await response.json();
+	console.log(result);
+  setAirportName(result.fullName || "");
+} catch (error) {
+	console.error(error);
+  setAirportName([])
+}
+};
+
 const fetchFlightSchedule = async (airportCode, setFlights, flights) => {
   console.log("Fetching flight schedule for:", airportCode);
 
@@ -51,15 +73,16 @@ const fetchFlightSchedule = async (airportCode, setFlights, flights) => {
     const scheduledFlights = (result.departures || []).filter(flight =>
       flight.status === "Scheduled" || flight.status === "Expected"
     );
-    console.log("Filtered Scheduled Flights:", scheduledFlights); // Debugging
-    setFlights(scheduledFlights); // Update state
+    console.log("Filtered Scheduled Flights:", scheduledFlights); 
+    setFlights(scheduledFlights || []); 
     console.log(flights)
   } catch (error) {
     console.error(error);
+    setFlights([]); 
   }
 };
 
-export function SearchBox({ onSearch, setFlights, flights, setCurrentAirport }) {
+export function SearchBox({ onSearch, setFlights, flights, setCurrentAirport, setAirportName}) {
   const [searchText, setSearchText] = useState('');
 
   const handleInputChange = (event) => {
@@ -68,7 +91,7 @@ export function SearchBox({ onSearch, setFlights, flights, setCurrentAirport }) 
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
-      onSearch(searchText.toUpperCase(), setFlights, flights);
+      onSearch(searchText.toUpperCase(), setFlights, flights, setAirportName);
       setCurrentAirport(searchText.toUpperCase())
     }
   };
@@ -89,23 +112,31 @@ export function SearchBox({ onSearch, setFlights, flights, setCurrentAirport }) 
 
 const FlightCard = ({ flight }) => {
   return (
-    <Card style={{ width: '18rem', margin: '10px' }}>
+    <Col sm={12}>
+    <Card style={{ display: 'flex', alignItems: 'center', width: '100%', margin: '15px', marginBottom: '10px', borderRadius: '25px', borderWidth: '4px'}}>
       <Card.Body>
-        <Card.Title>Flight {flight.number}</Card.Title>
-        <Card.Subtitle className="mb-2 text-muted">{flight.airline.name}</Card.Subtitle>
+        <Card.Title style = {{fontSize: '32px', color:'#6cb1c9'}}><b>Flight {flight.number}</b></Card.Title>
+        <Card.Subtitle style = {{fontSize: '24px', color: 'darkgray'}}><b><em>{flight.airline.name}</em></b></Card.Subtitle>
         <Card.Text>
-          <b>Status:</b> {flight.status} <br />
+          <b>Terminal:</b> {flight.departure.terminal || "Unknown"} <br />
           <b>Aircraft:</b> {flight.aircraft?.model || "Unknown"} <br />
-          <b>Departure:</b> {flight.departure.scheduledTime.local} <br />
-          <b>Arrival:</b> {flight.arrival.airport?.name || "Unknown"}
+          <b>Departure:</b> {format(parseISO(flight.departure.scheduledTime.local), 'MMMM dd, yyyy h:mm a')} <br />
+          <b>Arrival:</b> {flight.arrival.airport?.name + " (" + flight.arrival.airport?.iata + ")" || "Unknown"}
         </Card.Text>
       </Card.Body>
     </Card>
+    </Col>
   );
+};
+
+const handleSearch = (airportCode, setFlights, flights, setAirportName ) => {
+  fetchFlightSchedule(airportCode, setFlights, flights); // Call the fetchFlightSchedule function
+  fetchAirportName(airportCode, setAirportName); // Call the fetchAirportName function
 };
 
 function App() {
   const [currentAirport, setCurrentAirport] = useState('');
+  const [airportName, setAirportName] = useState('');
   const [flights, setFlights] = useState([]);
   return (
     <div className="App">
@@ -116,20 +147,23 @@ function App() {
       <div className="buttons">
         <Button style={{ backgroundColor: '#6cb1c9', width: "100px", fontSize: "25px", borderColor: '#6cb1c9', borderRadius: '20px', margin: '10px' }} font="Helvetica" className="airportbutton" onClick={() => {
           fetchFlightSchedule('DFW', setFlights, flights);
+          fetchAirportName('DFW', setAirportName);
           setCurrentAirport('DFW');
         }}> <b>DFW</b></Button>
         <Button style={{ backgroundColor: '#6cb1c9', width: "100px", fontSize: "25px", borderColor: '#6cb1c9', borderRadius: '20px', margin: '10px' }} font="Helvetica" className="airportbutton" onClick={() => {
           fetchFlightSchedule('SFO', setFlights, flights);
+          fetchAirportName('SFO', setAirportName);
           setCurrentAirport('SFO');
         }}> <b>SFO</b> </Button>
         <Button style={{ backgroundColor: '#6cb1c9', width: "100px", fontSize: "25px", borderColor: '#6cb1c9', borderRadius: '20px', margin: '10px' }} font="Helvetica" className="airportbutton" onClick={() => {
           fetchFlightSchedule('AUS', setFlights, flights);
+          fetchAirportName('AUS', setAirportName);
           setCurrentAirport('AUS');
         }}> <b>AUS</b> </Button>
       </div>
-      <SearchBox onSearch={fetchFlightSchedule} setFlights={setFlights} flights={flights} setCurrentAirport={setCurrentAirport}></SearchBox>
-      <div className="searchResults">
-        <h2><b>Showing Flights for {currentAirport}</b></h2>
+      <SearchBox onSearch={handleSearch} setFlights={setFlights} flights={flights} setCurrentAirport={setCurrentAirport} setAirportName = {setAirportName}></SearchBox>
+      <Col sm={12} className="searchResults">
+        <h2><b>Showing Flights for {airportName} ({currentAirport})</b></h2>
         <div style={{ display: 'flex', flexWrap: 'wrap' }}>
           {flights.length > 0 ? (
             flights.map((flight, index) => <FlightCard key={index} flight={flight} />)
@@ -137,7 +171,7 @@ function App() {
             <p>No flights available.</p>
           )}
         </div>
-      </div>
+      </Col>
     </div>
   );
 }

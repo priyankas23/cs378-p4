@@ -1,6 +1,7 @@
 .App {
   font: Helvetica; 
   margin-left: 0px;
+  width: 550px;
 }
 
 .App h1{
@@ -12,7 +13,7 @@
 .App input{
   margin-left: 10px;
   border-radius: 10px;
-  width: 100%;
+  width: 75%;
   height: 40px;
   padding: 5px;
   font-size: 25px;
@@ -26,6 +27,15 @@
   color: darkgray;
 }
 
+.App h2 {
+  color: darkgray;
+  margin-left: 10px;
+  width: 100%;
+}
+
+.searchResults{
+  width: 100%;
+}
 .App-logo {
   height: 40vmin;
   pointer-events: none;
