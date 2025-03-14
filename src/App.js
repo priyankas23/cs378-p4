@@ -11,7 +11,7 @@ import { format, parseISO } from 'date-fns';
 
 
 const headerImage = {
-  logo: 'INPLANESIGHTLOGO.PNG',
+  logo: 'INPLANESIGHTLOGO.png',
 }
 
 const API_KEY = '5e280eff54msh125ec8c51385101p131466jsne19c66db25b6';
